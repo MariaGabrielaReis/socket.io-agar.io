@@ -1,21 +1,44 @@
 const io = require("../servers").io;
+
 const Orb = require("./classes/Orb");
+const Player = require("./classes/Player");
+const PlayerConfig = require("./classes/PlayerConfig");
+const PlayerData = require("./classes/PlayerData");
 
 // make an orbs array that will host all 500/5000 NOT PLAYER orbs
 // every time one is absorb, the server will make a new one
 const orbs = [];
+const settings = {
+  defaultNumberOfOrbs: 500, // number of orbs on the map
+  defaultSpeed: 6,
+  defaultSize: 6,
+  defaultZoom: 1.5,
+  worldWidth: 500,
+  worldHeight: 500,
+  defaultGenericOrbSize: 5, // smaller than players
+};
+const players = [];
 
-// on server start, to make our initial 500
+// on server start, to make our initial defaultNumberOfOrbs
 initGame();
 
 io.on("connect", socket => {
   // event that runs on join that does init game stuff
-  socket.emit("init", { orbs });
+
+  socket.on("init", (playerObj, ackCallback) => {
+    const playerName = playerObj.playerName;
+    const playerConfig = new PlayerConfig(settings); // the data specific to this player that only the player needs to know
+    const playerData = new PlayerData(playerName, settings); // the data specific to this player that everyone needs to know
+    const player = new Player(socket.id, playerConfig, playerData); // a master player object to house both
+    players.push(player);
+
+    ackCallback(orbs); // send the orbs array back as and ack function
+  });
 });
 
 function initGame() {
-  // loop 500 times, and push a new Orb into our array
-  for (let i = 0; i < 500; i++) {
+  // loop defaultNumberOfOrbs times, and push a new Orb into our array
+  for (let i = 0; i < settings.defaultNumberOfOrbs; i++) {
     orbs.push(new Orb());
   }
 }

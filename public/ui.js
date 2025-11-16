@@ -32,5 +32,5 @@ document.querySelector(".start-game").addEventListener("click", event => {
   // show the hiddenOnStart elements
   const arrayElements = Array.from(document.querySelectorAll(".hiddenOnStart"));
   arrayElements.forEach(element => element.removeAttribute("hidden"));
-  init();
+  init(); // is in the socket
 });
