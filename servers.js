@@ -1,3 +1,4 @@
+//Where the servers are created
 const express = require("express");
 const socketio = require("socket.io");
 
