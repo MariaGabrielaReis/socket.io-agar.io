@@ -13,12 +13,12 @@ const PlayerData = require("./classes/PlayerData");
 // every time one is absorb, the server will make a new one
 const orbs = [];
 const settings = {
-  defaultNumberOfOrbs: 500, // number of orbs on the map
+  defaultNumberOfOrbs: 5000, // number of orbs on the map
   defaultSpeed: 6,
   defaultSize: 6,
   defaultZoom: 1.5,
-  worldWidth: 500,
-  worldHeight: 500,
+  worldWidth: 5000,
+  worldHeight: 5000,
   defaultGenericOrbSize: 5, // smaller than players
 };
 const players = [];
@@ -112,7 +112,16 @@ io.on("connect", socket => {
     }
   });
 
-  socket.on("disconnect", () => {
+  socket.on("disconnect", reason => {
+    // loop through players and find the player with THIS players socketID and splice that player out
+    for (let i = 0; i < players.length; i++) {
+      if (players[i].socketId === player.socketId) {
+        // these are the droids we're lookin for. Splice the player yout of the players AND playersForUsers
+        players.splice(i, 1, {});
+        playersForUsers.splice(i, 1, {});
+        break;
+      }
+    }
     // check to see if players is empty. If so, stop "ticking"
     if (players.length === 0) {
       clearInterval(tickTockInterval);
