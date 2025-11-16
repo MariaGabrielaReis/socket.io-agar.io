@@ -1,10 +1,3 @@
-const init = () => {
-  draw();
-};
-
-player.locX = Math.floor(500 * Math.random() + 10); // horizontal axis
-player.locY = Math.floor(500 * Math.random() + 10); // vertical axis
-
 const draw = () => {
   // reset the context translate back to default
   context.setTransform(1, 0, 0, 1, 0, 0);
@@ -18,23 +11,34 @@ const draw = () => {
   // translate moves the canvas/context to where the player is at
   context.translate(camX, camY);
 
-  context.beginPath();
-  context.fillStyle = "rgba(14, 182, 208, 1)";
-  // draw an arc/ circle
-  // context.arc(center x, centery of the arc, radius of the circle, where to start drawing in radians - 0 = 3:00,
-  // where to stop drawing in radians - Pi = 90deg)
-  context.arc(player.locX, player.locY, 10, 0, Math.PI * 2);
-  context.fill();
-  context.lineWidth = 3; // how wide to draw a line in pixels
-  context.strokeStyle = "rgba(6, 100, 115, 1)"; // draw a green line
-  context.stroke();
+  // draw all the players
+  players.forEach(playerItem => {
+    context.beginPath();
+    context.fillStyle = playerItem.playerData.color;
+    // draw an arc/ circle
+    // context.arc(center x, centery of the arc, radius of the circle, where to start drawing in radians - 0 = 3:00,
+    // where to stop drawing in radians - Pi = 90deg)
+    context.arc(
+      playerItem.playerData.locX,
+      playerItem.playerData.locY,
+      playerItem.playerData.radius,
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+    context.lineWidth = 3; // how wide to draw a line in pixels
+    context.strokeStyle = "rgba(12, 162, 185, 1)"; // draw a green line
+    context.stroke();
+  });
 
+  // draw all the orbs
   orbs.forEach(orb => {
     context.beginPath(); // this will start a new path
     context.fillStyle = orb.color;
     context.arc(orb.locX, orb.locY, orb.radius, 0, Math.PI * 2);
     context.fill();
   });
+
   requestAnimationFrame(draw); // is like controlled loop, it runs recursively, every paint/frame
 };
 
@@ -65,16 +69,6 @@ canvas.addEventListener("mousemove", event => {
     yVector = 1 - (angleDeg + 90) / 90;
   }
 
-  speed = 10;
-  xV = xVector;
-  yV = yVector;
-
-  if ((player.locX < 5 && xV < 0) || (player.locX > 500 && xV > 0)) {
-    player.locY -= speed * yV;
-  } else if ((player.locY < 5 && yV > 0) || (player.locY > 500 && yV < 0)) {
-    player.locX += speed * xV;
-  } else {
-    player.locX += speed * xV;
-    player.locY -= speed * yV;
-  }
+  player.xVector = xVector ?? 0.1;
+  player.yVector = yVector ?? 0.1;
 });

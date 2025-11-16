@@ -7,8 +7,9 @@ const context = canvas.getContext("2d");
 canvas.height = wHeight;
 canvas.width = wWidth;
 
-const player = {};
+const player = {}; // this will be all things "this" player
 let orbs = []; // this is a global for all non-player orbs
+let players = []; // this is an array of all players
 
 const loginModal = new bootstrap.Modal(document.querySelector("#loginModal"));
 const spawnModal = new bootstrap.Modal(document.querySelector("#spawnModal"));
