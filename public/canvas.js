@@ -13,6 +13,11 @@ const draw = () => {
 
   // draw all the players
   players.forEach(playerItem => {
+    if (!playerItem.playerData) {
+      // if the playerData doesn't exist, this is an absorbed player and we won't draw
+      return;
+    }
+
     context.beginPath();
     context.fillStyle = playerItem.playerData.color;
     // draw an arc/ circle

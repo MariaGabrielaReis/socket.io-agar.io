@@ -95,6 +95,8 @@ io.on("connect", socket => {
 
       // emit to all sockets playing the game, the orbSwitch event so it can update orbs...just the new orb
       io.to("game").emit("orbSwitch", orbData);
+      // emit to all sockets playing the game, the updateLeaderBoard event because someone just scored
+      io.to("game").emit("updateLeaderBoard", getLeaderBoard());
     }
 
     // check for player collisions of tocking player
@@ -123,4 +125,18 @@ function initGame() {
   for (let i = 0; i < settings.defaultNumberOfOrbs; i++) {
     orbs.push(new Orb(settings));
   }
+}
+
+function getLeaderBoard() {
+  const leaderBoardList = players.map(curPlayer => {
+    if (curPlayer.playerData) {
+      return {
+        name: curPlayer.playerData.name,
+        score: curPlayer.playerData.score,
+      };
+    } else {
+      return {};
+    }
+  });
+  return leaderBoardList;
 }
