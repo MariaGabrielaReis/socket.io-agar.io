@@ -1,5 +1,9 @@
 const io = require("../servers").io;
 
+const {
+  checkForOrbCollisions,
+  checkForPlayerCollisions,
+} = require("./checkCollisions");
 const Orb = require("./classes/Orb");
 const Player = require("./classes/Player");
 const PlayerConfig = require("./classes/PlayerConfig");
@@ -60,18 +64,49 @@ io.on("connect", socket => {
     const yV = (player.playerConfig.yVector = data.yVector);
 
     if (
-      (player.playerData.locX < 5 && xV < 0) ||
-      (player.playerData.locX > 500 && xV > 0)
+      (player.playerData.locX > 5 && xV < 0) ||
+      (player.playerData.locX < settings.worldWidth && xV > 0)
     ) {
-      player.playerData.locY -= speed * yV;
-    } else if (
-      (player.playerData.locY < 5 && yV > 0) ||
-      (player.playerData.locY > 500 && yV < 0)
+      // if player can move in the x, move
+      player.playerData.locX += speed * xV;
+    }
+    if (
+      (player.playerData.locY > 5 && yV > 0) ||
+      (player.playerData.locY < settings.worldHeight && yV < 0)
     ) {
-      player.playerData.locX += speed * xV;
-    } else {
-      player.playerData.locX += speed * xV;
+      // if player can move in the y, move
       player.playerData.locY -= speed * yV;
+    }
+
+    // check for the tocking player to hit orbs
+    const capturedOrb = checkForOrbCollisions(
+      player.playerData,
+      player.playerConfig,
+      orbs,
+      settings,
+    );
+    // function return null if not collision, an index if there is a collision
+    if (capturedOrb !== null) {
+      // remove the orb that needs to be replaced (at capturedOrb) and add new orb
+      orbs.splice(capturedOrb, 1, new Orb(settings));
+
+      // now update the clients with the new orb
+      const orbData = { capturedOrb, newOrb: orbs[capturedOrb] };
+
+      // emit to all sockets playing the game, the orbSwitch event so it can update orbs...just the new orb
+      io.to("game").emit("orbSwitch", orbData);
+    }
+
+    // check for player collisions of tocking player
+    const absorbData = checkForPlayerCollisions(
+      player.playerData,
+      player.playerConfig,
+      players,
+      playersForUsers,
+      socket.id,
+    );
+    if (absorbData) {
+      io.to("game").emit("playerAbsorbed", absorbData);
     }
   });
 
